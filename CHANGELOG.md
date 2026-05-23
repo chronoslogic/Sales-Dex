@@ -4,11 +4,23 @@ All notable changes to Sales Dex are documented here.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-23
+
 ### Changed
 
+- Replaced the always-visible side details panel with a modal opened from the org table.
+- Moved the login form into a **New connection** header modal.
+- Renamed **Client record** to **Client information**.
+- Renamed **Last used** to **Last log in at**.
 - Reworked README and user guide to be easier for non-technical users.
 - Added a clearer **How To Install** section.
 - Clarified that Eduardo is the maintainer and users only download the app for now.
+
+### Fixed
+
+- Fixed the initial org details empty state clipping caused by a shared compact CSS class.
+- Fixed setting the default org by using global Salesforce CLI config instead of project-local config.
+- Fixed mobile header wrapping so all top actions stay visible.
 
 ## [0.1.0] - 2026-05-23
 

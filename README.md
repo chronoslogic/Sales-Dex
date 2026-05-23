@@ -4,7 +4,7 @@
 
 It is especially useful for people who work with multiple clients, sandboxes, and production orgs during the same day.
 
-Created by **Eduardo Souza** with **Codex**.  
+Created by **Eduardo Souza** with **Codex**.
 
 ## Download
 
@@ -15,13 +15,13 @@ Download the latest version from the GitHub Releases page:
 Current version:
 
 ```text
-0.1.0
+0.1.1
 ```
 
 Current available download:
 
 ```text
-Windows: Sales-Dex-0.1.0-x64.exe
+Windows: Sales-Dex-0.1.1-x64.exe
 macOS: In progress
 ```
 
@@ -104,7 +104,7 @@ Official Salesforce CLI download page:
 2. Download:
 
    ```text
-   Sales-Dex-0.1.0-x64.exe
+   Sales-Dex-0.1.1-x64.exe
    ```
 
 3. Save it somewhere easy to find, for example:
@@ -117,7 +117,7 @@ Official Salesforce CLI download page:
 
 ### Step 3: Open Sales Dex
 
-1. Double-click `Sales-Dex-0.1.0-x64.exe`.
+1. Double-click `Sales-Dex-0.1.1-x64.exe`.
 
 2. If Windows shows a security warning, confirm that the file came from the official company/GitHub release before opening it.
 
@@ -245,7 +245,7 @@ macOS builds should be created on a Mac or a macOS GitHub Actions runner.
 
 | Dependency | Version |
 | --- | --- |
-| Sales Dex | `0.1.0` |
+| Sales Dex | `0.1.1` |
 | Electron | `42.2.0` |
 | React | `19.2.6` |
 | Vite | `7.3.3` |

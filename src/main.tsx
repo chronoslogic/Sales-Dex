@@ -91,6 +91,8 @@ function App() {
   const [notice, setNotice] = useState<{ type: "success" | "warning" | "error"; text: string } | null>(null);
   const [loginAlias, setLoginAlias] = useState("");
   const [loginUrl, setLoginUrl] = useState("https://login.salesforce.com");
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const selectedOrg = useMemo(
     () => orgs.find((org) => (org.alias || org.username) === selectedTarget) || null,
@@ -198,10 +200,10 @@ function App() {
         body: JSON.stringify(metadata)
       });
       if (!data.ok) {
-        setNotice({ type: "error", text: data.message || "Unable to save the local client record." });
+        setNotice({ type: "error", text: data.message || "Unable to save the client information." });
         return;
       }
-      setNotice({ type: "success", text: "Local client record saved." });
+      setNotice({ type: "success", text: "Client information saved." });
       await loadOrgs();
     } catch (error) {
       setNotice({ type: "error", text: getErrorMessage(error) });
@@ -220,7 +222,9 @@ function App() {
       if (!confirmed) return;
     }
 
-    if (action === "default" && selectedOrg?.effectiveEnvironment === "Production") {
+    const actionOrg = orgs.find((org) => (org.alias || org.username) === target) || selectedOrg;
+
+    if (action === "default" && actionOrg?.effectiveEnvironment === "Production") {
       const confirmed = window.confirm(
         `You are setting a production org as the default target: ${target}. Confirm this is the correct client before continuing.`
       );
@@ -262,6 +266,7 @@ function App() {
       }
       setNotice({ type: "success", text: data.message || "Login completed." });
       setLoginAlias("");
+      setLoginModalOpen(false);
       await loadOrgs();
     } catch (error) {
       setNotice({ type: "error", text: getErrorMessage(error) });
@@ -285,6 +290,10 @@ function App() {
             <span className="pulse" />
             {stats.connected}/{stats.total} connected
           </div>
+          <button className="button primary" onClick={() => setLoginModalOpen(true)}>
+            <LogIn size={16} />
+            New connection
+          </button>
           <button className="button secondary" onClick={loadOrgs} disabled={loadingOrgs}>
             <RefreshCw size={16} />
             {loadingOrgs ? "Refreshing" : "Refresh"}
@@ -337,7 +346,10 @@ function App() {
             orgs={filteredOrgs}
             selectedTarget={selectedTarget}
             loading={loadingOrgs}
-            onSelect={selectOrg}
+            onSelect={(org) => {
+              selectOrg(org);
+              setDetailsModalOpen(true);
+            }}
             onCopy={copyText}
             onOpen={(target) => runAction("open", target)}
             onDefault={(target) => runAction("default", target)}
@@ -345,45 +357,44 @@ function App() {
           />
         </div>
 
-        <aside className="side-panel">
-          <DetailsPanel
-            details={details}
-            selectedOrg={selectedOrg}
-            loading={loadingDetails}
-            metadata={metadata}
-            onMetadataChange={setMetadata}
-            onSave={saveMetadata}
-            onRefresh={() => selectedTarget && loadDetails(selectedTarget)}
-            onCopy={copyText}
-            onOpen={(target) => runAction("open", target)}
-            onDefault={(target) => runAction("default", target)}
-            onLogout={(target) => runAction("logout", target)}
-            busyAction={busyAction}
-          />
-
-          <section className="login-panel">
-            <div className="panel-heading">
-              <LogIn size={18} />
-              <h2>New login</h2>
-            </div>
-            <label>
-              Alias
-              <input value={loginAlias} onChange={(event) => setLoginAlias(event.target.value)} placeholder="client-prod" />
-            </label>
-            <label>
-              Login URL
-              <select value={loginUrl} onChange={(event) => setLoginUrl(event.target.value)}>
-                <option value="https://login.salesforce.com">Production</option>
-                <option value="https://test.salesforce.com">Sandbox</option>
-              </select>
-            </label>
-            <button className="button primary full" onClick={login} disabled={!loginAlias || busyAction === "login"}>
-              <LogIn size={16} />
-              {busyAction === "login" ? "Waiting for browser login" : "Start login"}
-            </button>
-          </section>
-        </aside>
       </section>
+
+      <Modal title="Org details" icon={<Eye size={18} />} open={detailsModalOpen} onClose={() => setDetailsModalOpen(false)}>
+        <DetailsPanel
+          details={details}
+          selectedOrg={selectedOrg}
+          loading={loadingDetails}
+          metadata={metadata}
+          onMetadataChange={setMetadata}
+          onSave={saveMetadata}
+          onRefresh={() => selectedTarget && loadDetails(selectedTarget)}
+          onCopy={copyText}
+          onOpen={(target) => runAction("open", target)}
+          onDefault={(target) => runAction("default", target)}
+          onLogout={(target) => runAction("logout", target)}
+          busyAction={busyAction}
+        />
+      </Modal>
+
+      <Modal title="New connection" icon={<LogIn size={18} />} open={loginModalOpen} onClose={() => setLoginModalOpen(false)} compact>
+        <section className="login-panel">
+          <label>
+            Alias
+            <input value={loginAlias} onChange={(event) => setLoginAlias(event.target.value)} placeholder="client-prod" />
+          </label>
+          <label>
+            Login URL
+            <select value={loginUrl} onChange={(event) => setLoginUrl(event.target.value)}>
+              <option value="https://login.salesforce.com">Production</option>
+              <option value="https://test.salesforce.com">Sandbox</option>
+            </select>
+          </label>
+          <button className="button primary full" onClick={login} disabled={!loginAlias || busyAction === "login"}>
+            <LogIn size={16} />
+            {busyAction === "login" ? "Waiting for browser login" : "Start login"}
+          </button>
+        </section>
+      </Modal>
     </main>
   );
 }
@@ -429,7 +440,7 @@ function OrgTable({
     return (
       <EmptyState
         title="No orgs found"
-        description="Use the login panel or authenticate an org with sf org login web --alias <alias>."
+        description="Use New connection to authenticate a Salesforce org."
       />
     );
   }
@@ -446,7 +457,7 @@ function OrgTable({
             <th>Instance URL</th>
             <th>Type</th>
             <th>Status</th>
-            <th>Last used</th>
+            <th>Last log in at</th>
             <th>Default</th>
             <th>Actions</th>
           </tr>
@@ -469,7 +480,7 @@ function OrgTable({
                   <code>{org.alias || "-"}</code>
                 </td>
                 <td className="muted">{org.username || "-"}</td>
-                <td className="muted compact">{org.orgId || "-"}</td>
+                <td className="muted truncate-cell">{org.orgId || "-"}</td>
                 <td className="muted url-cell">{org.instanceUrl || "-"}</td>
                 <td>
                   <EnvironmentBadge environment={org.effectiveEnvironment} />
@@ -477,7 +488,7 @@ function OrgTable({
                 <td>
                   <StatusBadge status={org.connectedStatus} />
                 </td>
-                <td className="muted">{formatDate(org.localLastUsedAt || org.lastUsed)}</td>
+                <td className="muted date-cell">{formatDate(org.localLastUsedAt || org.lastUsed)}</td>
                 <td>{org.isDefault ? <DefaultBadge /> : <span className="muted">-</span>}</td>
                 <td>
                   <div className="row-actions" onClick={(event) => event.stopPropagation()}>
@@ -532,25 +543,88 @@ function DetailsPanel({
 
   return (
     <section className="details-panel">
-      <div className="panel-heading">
-        <Eye size={18} />
-        <h2>Org details</h2>
-        {loading && <span className="spinner" aria-label="Loading details" />}
-      </div>
+      {loading && <span className="spinner modal-spinner" aria-label="Loading details" />}
 
       {!target ? (
-        <EmptyState title="Select an org" description="Choose a row to validate connection status and edit local client metadata." compact />
+        <EmptyState title="Select an org" description="Choose a row to validate connection status and edit client information." compact />
       ) : (
         <>
-          <div className="detail-grid">
-            <Detail label="Username" value={details?.username || selectedOrg?.username || "-"} />
-            <Detail label="Alias" value={target || "-"} mono />
-            <Detail label="Org ID" value={details?.orgId || selectedOrg?.orgId || "-"} mono />
-            <Detail label="Instance URL" value={details?.instanceUrl || selectedOrg?.instanceUrl || "-"} />
-            <Detail label="Login URL" value={details?.loginUrl || selectedOrg?.loginUrl || "-"} />
-            <Detail label="Connected status" value={details?.connectedStatus || selectedOrg?.connectedStatus || "-"} />
-            <Detail label="Type" value={details?.environment || selectedOrg?.effectiveEnvironment || "-"} />
-            <Detail label="API version" value={details?.apiVersion || "-"} />
+          <div className="modal-grid">
+            <div>
+              <div className="section-heading">
+                <Eye size={17} />
+                <h3>Org details</h3>
+              </div>
+              <div className="detail-grid">
+                <Detail label="Username" value={details?.username || selectedOrg?.username || "-"} />
+                <Detail label="Alias" value={target || "-"} mono />
+                <Detail label="Org ID" value={details?.orgId || selectedOrg?.orgId || "-"} mono />
+                <Detail label="Instance URL" value={details?.instanceUrl || selectedOrg?.instanceUrl || "-"} />
+                <Detail label="Login URL" value={details?.loginUrl || selectedOrg?.loginUrl || "-"} />
+                <Detail label="Connected status" value={details?.connectedStatus || selectedOrg?.connectedStatus || "-"} />
+                <Detail label="Type" value={details?.environment || selectedOrg?.effectiveEnvironment || "-"} />
+                <Detail label="API version" value={details?.apiVersion || "-"} />
+              </div>
+            </div>
+
+            <form className="metadata-form" onSubmit={(event) => event.preventDefault()}>
+              <div className="section-heading">
+                <UserRoundCog size={17} />
+                <h3>Client information</h3>
+              </div>
+              <label>
+                Client
+                <input
+                  value={metadata.client}
+                  onChange={(event) => onMetadataChange({ ...metadata, client: event.target.value })}
+                  placeholder="Name"
+                />
+              </label>
+              <label>
+                Alias
+                <input
+                  value={metadata.alias}
+                  onChange={(event) => onMetadataChange({ ...metadata, alias: event.target.value })}
+                  placeholder="client-prod"
+                />
+              </label>
+              <div className="form-row">
+                <label>
+                  Environment
+                  <select
+                    value={metadata.environment}
+                    onChange={(event) => onMetadataChange({ ...metadata, environment: event.target.value as Environment })}
+                  >
+                    <option value="Production">Production</option>
+                    <option value="Sandbox">Sandbox</option>
+                    <option value="Unknown">Unknown</option>
+                  </select>
+                </label>
+                <label>
+                  Risk level
+                  <select
+                    value={metadata.riskLevel}
+                    onChange={(event) => onMetadataChange({ ...metadata, riskLevel: event.target.value as RiskLevel })}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </label>
+              </div>
+              <label>
+                Notes
+                <textarea
+                  value={metadata.notes}
+                  onChange={(event) => onMetadataChange({ ...metadata, notes: event.target.value })}
+                  placeholder="Example: sensitive production org; confirm client before any deployment."
+                />
+              </label>
+              <button className="button primary full" onClick={onSave} disabled={!metadata.alias || busyAction === "save"}>
+                <Save size={16} />
+                Save client information
+              </button>
+            </form>
           </div>
 
           <div className="action-strip">
@@ -570,77 +644,72 @@ function DetailsPanel({
               <Star size={16} />
               Default
             </button>
-            <button className="button danger" onClick={() => onLogout(target)} disabled={busyAction === "logout"}>
-              <LogOut size={16} />
-              Disconnect
-            </button>
             <button className="button secondary" onClick={onRefresh} disabled={loading}>
               <RefreshCw size={16} />
               Status
             </button>
-          </div>
-
-          <form className="metadata-form" onSubmit={(event) => event.preventDefault()}>
-            <div className="panel-heading small">
-              <UserRoundCog size={17} />
-              <h3>Client record</h3>
-            </div>
-            <label>
-              Client
-              <input
-                value={metadata.client}
-                onChange={(event) => onMetadataChange({ ...metadata, client: event.target.value })}
-                placeholder="Cless Cosmetics"
-              />
-            </label>
-            <label>
-              Alias
-              <input
-                value={metadata.alias}
-                onChange={(event) => onMetadataChange({ ...metadata, alias: event.target.value })}
-                placeholder="client-prod"
-              />
-            </label>
-            <div className="form-row">
-              <label>
-                Environment
-                <select
-                  value={metadata.environment}
-                  onChange={(event) => onMetadataChange({ ...metadata, environment: event.target.value as Environment })}
-                >
-                  <option value="Production">Production</option>
-                  <option value="Sandbox">Sandbox</option>
-                  <option value="Unknown">Unknown</option>
-                </select>
-              </label>
-              <label>
-                Risk level
-                <select
-                  value={metadata.riskLevel}
-                  onChange={(event) => onMetadataChange({ ...metadata, riskLevel: event.target.value as RiskLevel })}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-              </label>
-            </div>
-            <label>
-              Notes
-              <textarea
-                value={metadata.notes}
-                onChange={(event) => onMetadataChange({ ...metadata, notes: event.target.value })}
-                placeholder="Example: sensitive production org; confirm client before any deployment."
-              />
-            </label>
-            <button className="button primary full" onClick={onSave} disabled={!metadata.alias || busyAction === "save"}>
-              <Save size={16} />
-              Save local record
+            <button className="button danger" onClick={() => onLogout(target)} disabled={busyAction === "logout"}>
+              <LogOut size={16} />
+              Disconnect
             </button>
-          </form>
+          </div>
         </>
       )}
     </section>
+  );
+}
+
+function Modal({
+  open,
+  title,
+  icon,
+  compact = false,
+  children,
+  onClose
+}: {
+  open: boolean;
+  title: string;
+  icon: React.ReactNode;
+  compact?: boolean;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, open]);
+
+  if (!open) return null;
+
+  const titleId = `${title.toLowerCase().replace(/\s+/g, "-")}-title`;
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <section
+        className={`modal-card ${compact ? "modal-card-compact" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="modal-header">
+          <div className="panel-heading">
+            {icon}
+            <h2 id={titleId}>{title}</h2>
+          </div>
+          <button className="icon-button modal-close" onClick={onClose} aria-label="Close modal">
+            <X size={18} />
+          </button>
+        </div>
+        {children}
+      </section>
+    </div>
   );
 }
 
@@ -683,7 +752,7 @@ function DefaultBadge() {
 
 function EmptyState({ title, description, compact = false }: { title: string; description: string; compact?: boolean }) {
   return (
-    <div className={`empty-state ${compact ? "compact" : ""}`}>
+    <div className={`empty-state ${compact ? "is-compact" : ""}`}>
       <Terminal size={compact ? 22 : 30} />
       <strong>{title}</strong>
       <span>{description}</span>
@@ -753,7 +822,10 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root") as HTMLElement & { salesDexRoot?: ReturnType<typeof createRoot> };
+rootElement.salesDexRoot = rootElement.salesDexRoot || createRoot(rootElement);
+
+rootElement.salesDexRoot.render(
   <React.StrictMode>
     <App />
     <div id="copy-toast" className="copy-toast" role="status" />

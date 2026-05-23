@@ -344,7 +344,7 @@ app.post("/local-api/orgs/metadata", asyncRoute(async (req, res) => {
 
 app.post("/local-api/actions/default", asyncRoute(async (req, res) => {
   const target = validateTarget(req.body.target);
-  const result = await runSf(["config", "set", `target-org=${target}`, "--json"]);
+  const result = await runSf(["config", "set", "--global", `target-org=${target}`, "--json"]);
   if (!result.ok) {
     res.status(200).json({ ok: false, message: result.message });
     return;

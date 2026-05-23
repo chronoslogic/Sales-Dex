@@ -25,7 +25,7 @@ If you are not sure whether Salesforce CLI is installed, ask the maintainer or y
 2. Download the Windows file:
 
    ```text
-   Sales-Dex-0.1.0-x64.exe
+   Sales-Dex-0.1.1-x64.exe
    ```
 
 3. Save the file somewhere easy to find.
