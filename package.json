@@ -1,0 +1,67 @@
+{
+  "name": "sales-dex",
+  "version": "0.1.0",
+  "private": true,
+  "productName": "Sales Dex",
+  "description": "Local Salesforce CLI org manager for multi-client teams.",
+  "author": "Eduardo and Codex",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c cyan,magenta \"node server/server.mjs\" \"vite --host 127.0.0.1\"",
+    "server": "node server/server.mjs",
+    "build": "tsc && vite build",
+    "preview": "npm run build && node server/server.mjs",
+    "desktop": "npm run build && electron .",
+    "desktop:dev": "concurrently -k -n api,web,electron -c cyan,magenta,green \"node server/server.mjs\" \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && set ELECTRON_START_URL=http://127.0.0.1:5173&& electron .\"",
+    "dist": "npm run dist:win",
+    "dist:win": "npm run build && electron-builder --win portable",
+    "dist:mac": "npm run build && electron-builder --mac dmg zip"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
+    "express": "^5.2.1",
+    "lucide-react": "^0.544.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "vite": "^7.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1",
+    "typescript": "^5.9.3",
+    "wait-on": "^9.0.10"
+  },
+  "build": {
+    "appId": "com.salesdex.app",
+    "productName": "Sales Dex",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "server/**",
+      "electron/**",
+      "build/icon.ico",
+      "package.json",
+      "node_modules/**"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "Sales-Dex-${version}-${arch}.${ext}"
+    }
+  }
+}

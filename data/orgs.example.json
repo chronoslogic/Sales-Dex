@@ -1,0 +1,22 @@
+{
+  "orgs": [
+    {
+      "alias": "client-prod",
+      "client": "Example Client",
+      "environment": "Production",
+      "riskLevel": "High",
+      "notes": "Sensitive production org. Confirm client context before any default-target or logout action.",
+      "updatedAt": "2026-05-23T12:00:00.000Z",
+      "lastUsedAt": "2026-05-23T12:00:00.000Z"
+    },
+    {
+      "alias": "client-sandbox",
+      "client": "Example Client",
+      "environment": "Sandbox",
+      "riskLevel": "Low",
+      "notes": "Development sandbox.",
+      "updatedAt": "2026-05-23T12:00:00.000Z",
+      "lastUsedAt": "2026-05-23T12:00:00.000Z"
+    }
+  ]
+}
