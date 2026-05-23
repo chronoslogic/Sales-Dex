@@ -2,6 +2,14 @@
 
 All notable changes to Sales Dex are documented here.
 
+## [Unreleased]
+
+### Changed
+
+- Reworked README and user guide to be easier for non-technical users.
+- Added a clearer **How To Install** section.
+- Clarified that Eduardo is the maintainer and users only download the app for now.
+
 ## [0.1.0] - 2026-05-23
 
 ### Added

@@ -1,84 +1,248 @@
 # Sales Dex
 
-**Sales Dex** is a local desktop app for Salesforce consultants, admins, and developers who work across many clients and orgs in the same day.
+**Sales Dex** is a local desktop app that helps Salesforce teams see and manage the Salesforce orgs connected on their computer.
 
-It gives users a clean command center for Salesforce CLI orgs: see what is connected, identify production vs sandbox, attach client context, validate connection status, open orgs, set a default target, and start new CLI logins without memorizing aliases or long commands.
+It is especially useful for people who work with multiple clients, sandboxes, and production orgs during the same day.
 
-Sales Dex was created by **Eduardo Souza**.
+Created by **Eduardo Souza** with **Codex**.  
+Maintained by **Eduardo Souza**. Users only need to download and use the app.
 
-## Purpose
+## Download
 
-Working with multiple Salesforce clients usually means switching between many browser sessions, CLI aliases, production orgs, sandboxes, and local terminal commands. Sales Dex reduces that context-switching friction.
+Download the latest version from the GitHub Releases page:
 
-The app does **not** replace Salesforce CLI. It sits on top of the local `sf` CLI and makes the active org inventory easier to see, organize, and use safely.
+[Download Sales Dex](https://github.com/chronoslogic/Sales-Dex/releases/latest)
+
+Current version:
+
+```text
+0.1.0
+```
+
+Current available download:
+
+```text
+Windows: Sales-Dex-0.1.0-x64.exe
+macOS: Not available yet
+```
 
 ## What Sales Dex Does
 
-- Lists Salesforce orgs authenticated in the local Salesforce CLI.
-- Shows org details such as username, alias, Org ID, instance URL, login URL, status, environment, and API version.
-- Lets users associate a CLI org with local client metadata:
-  - client name
-  - environment
-  - risk level
-  - notes
-- Provides quick actions:
-  - copy alias
-  - copy username
-  - open org in browser
-  - set org as default CLI target
-  - refresh connection status
-  - disconnect org from local CLI
-  - start a new web login
-- Keeps actions allowlisted. There is no free-form terminal command box.
+Sales Dex shows the Salesforce orgs that are already connected on your computer through Salesforce CLI.
+
+With Sales Dex, you can:
+
+- see which Salesforce orgs are connected
+- identify production orgs and sandboxes
+- see the username, alias, Org ID, and instance URL
+- add a client name and notes to each org
+- mark an org risk level as Low, Medium, or High
+- open an org in the browser
+- set an org as your default Salesforce CLI org
+- disconnect an org from your local Salesforce CLI
+- start a new Salesforce login
 
 ## What Sales Dex Does Not Do
 
-- It does not store Salesforce passwords.
-- It does not upload org data to a cloud service.
-- It does not run arbitrary shell commands.
-- It does not make metadata or data changes inside Salesforce.
-- It does not replace normal Salesforce permissions, MFA, session policies, or CLI authentication.
+Sales Dex does **not**:
 
-## How It Works
+- store Salesforce passwords
+- upload org information to a cloud server
+- change Salesforce data
+- deploy metadata
+- create or edit Salesforce configuration
+- replace Salesforce permissions, MFA, or login security
 
-Sales Dex runs entirely on the user's machine.
-
-```text
-Sales Dex desktop UI
-  -> local Node/Express API
-  -> allowlisted Salesforce CLI commands
-  -> local JSON metadata file
-```
-
-The local API executes specific Salesforce CLI commands:
-
-| Feature | Salesforce CLI command |
-| --- | --- |
-| List orgs | `sf org list --json` |
-| Show org details | `sf org display --target-org <alias> --json` |
-| Open org | `sf org open --target-org <alias>` |
-| Set default org | `sf config set target-org=<alias>` |
-| Disconnect org | `sf org logout --target-org <alias>` |
-| New login | `sf org login web --alias <alias>` |
+It is a local helper app for org visibility and switching.
 
 ## Requirements
 
-For regular users:
+Before using Sales Dex, each user needs:
 
-- Windows or macOS.
-- Salesforce CLI installed.
-- The `sf` command available to the app.
-- A Salesforce account for each org the user wants to authenticate.
-- Browser access for Salesforce CLI web login.
+- Windows computer
+- Salesforce CLI installed
+- access to at least one Salesforce org
+- permission to log in to that Salesforce org
 
-For developers:
+Sales Dex depends on Salesforce CLI. If Salesforce CLI is not installed, Sales Dex will not be able to list or open orgs.
 
-- Node.js.
-- npm.
-- Git.
-- Salesforce CLI.
+Official Salesforce CLI download page:
 
-Current development stack:
+[Salesforce CLI Downloads](https://developer.salesforce.com/tools/salesforcecli/)
+
+## How To Install
+
+### Step 1: Install Salesforce CLI
+
+1. Open the official Salesforce CLI download page:
+
+   [Salesforce CLI Downloads](https://developer.salesforce.com/tools/salesforcecli/)
+
+2. Choose the installer for your computer.
+
+   Most Windows users should choose:
+
+   ```text
+   Download for Windows x64
+   ```
+
+3. Run the Salesforce CLI installer.
+
+4. After installation, open Command Prompt or PowerShell and type:
+
+   ```bash
+   sf --version
+   ```
+
+5. If you see a version number, Salesforce CLI is installed correctly.
+
+### Step 2: Download Sales Dex
+
+1. Open the latest Sales Dex release:
+
+   [Sales Dex Releases](https://github.com/chronoslogic/Sales-Dex/releases/latest)
+
+2. Download:
+
+   ```text
+   Sales-Dex-0.1.0-x64.exe
+   ```
+
+3. Save it somewhere easy to find, for example:
+
+   ```text
+   Downloads
+   Desktop
+   Company Tools
+   ```
+
+### Step 3: Open Sales Dex
+
+1. Double-click `Sales-Dex-0.1.0-x64.exe`.
+
+2. If Windows shows a security warning, confirm that the file came from the official company/GitHub release before opening it.
+
+3. Sales Dex will open as a desktop app.
+
+4. Click **Refresh**.
+
+## First Use
+
+If you already logged in to Salesforce CLI before, your orgs should appear after clicking **Refresh**.
+
+If no orgs appear:
+
+1. In Sales Dex, go to **New login**.
+2. Enter an alias, for example:
+
+   ```text
+   client-prod
+   ```
+
+3. Choose **Production** or **Sandbox**.
+4. Click **Start login**.
+5. Your browser will open Salesforce login.
+6. Log in normally.
+7. Return to Sales Dex and click **Refresh**.
+
+## Button Guide
+
+| Button | What it does |
+| --- | --- |
+| Refresh | Reloads the org list from Salesforce CLI. |
+| Copy alias | Copies the org alias to your clipboard. |
+| Copy username | Copies the Salesforce username to your clipboard. |
+| Open | Opens the selected org in your browser. |
+| Default | Sets the selected org as your default Salesforce CLI org. |
+| Status | Checks the selected org connection again. |
+| Disconnect | Logs the selected org out of Salesforce CLI on your computer. |
+| Start login | Starts a new Salesforce login using Salesforce CLI. |
+| Save local record | Saves client name, environment, risk level, and notes on your computer. |
+
+## Important Safety Notes
+
+- Always check whether an org is **Production** or **Sandbox** before using it.
+- Be careful when setting a production org as default.
+- Disconnecting an org only logs it out from your local Salesforce CLI.
+- Sales Dex stores your notes and client labels locally on your machine.
+- Sales Dex does not send your Salesforce org list to an external server.
+
+## Updates
+
+For now, users do not update the app themselves from inside Sales Dex.
+
+When a new version is ready, Eduardo will publish it in GitHub Releases. Users can download the new version from:
+
+[Sales Dex Releases](https://github.com/chronoslogic/Sales-Dex/releases)
+
+## Troubleshooting
+
+### Sales Dex opens, but no orgs appear
+
+Click **Refresh**.
+
+If the list is still empty, Salesforce CLI may not have any logged-in orgs yet. Use **New login** in Sales Dex, or ask the maintainer for help.
+
+### Salesforce CLI is not installed
+
+Install Salesforce CLI from the official Salesforce download page:
+
+[Salesforce CLI Downloads](https://developer.salesforce.com/tools/salesforcecli/)
+
+### Windows blocks the app
+
+The current Windows app is not code signed yet. Windows may show a warning the first time you open it.
+
+Only open the file if you downloaded it from the official Sales Dex GitHub release or received it from the maintainer.
+
+### I need help
+
+Contact the maintainer:
+
+```text
+Eduardo
+```
+
+## For Maintainers
+
+The sections below are for the person maintaining Sales Dex.
+
+Regular users do not need these steps.
+
+### Development Setup
+
+```bash
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:5173
+```
+
+### Build Windows App
+
+```bash
+npm run dist:win
+```
+
+The executable is generated in:
+
+```text
+release/
+```
+
+### Build macOS App
+
+```bash
+npm run dist:mac
+```
+
+macOS builds should be created on a Mac or a macOS GitHub Actions runner.
+
+### Technical Stack
 
 | Dependency | Version |
 | --- | --- |
@@ -90,137 +254,12 @@ Current development stack:
 | TypeScript | `5.9.3` |
 | Salesforce CLI | External local dependency |
 
-## Install and First Use
+## More Documentation
 
-1. Install Salesforce CLI.
-2. Authenticate at least one org:
-
-```bash
-sf org login web --alias client-prod
-```
-
-3. Open Sales Dex.
-4. Click **Refresh**.
-5. Select an org row to validate details.
-6. Fill in client metadata if desired.
-7. Use quick actions from the table or details panel.
-
-## Local Metadata
-
-Sales Dex stores client labels, risk level, environment, and notes locally.
-
-In development, the file is:
-
-```text
-data/orgs.json
-```
-
-In the packaged desktop app, the file is stored in the user's app data directory. This keeps each user's client metadata private to their machine.
-
-An example file is available at:
-
-```text
-data/orgs.example.json
-```
-
-Do not commit real `data/orgs.json` files. They can contain usernames, aliases, Org IDs, client names, and notes.
-
-## Safety Model
-
-Sales Dex is intentionally conservative:
-
-- API endpoints are scoped under `/local-api/*`.
-- There is no endpoint for arbitrary shell commands.
-- Actions are allowlisted in code.
-- Production orgs are visibly labeled.
-- Setting a production org as default requires confirmation.
-- Disconnecting an org requires confirmation.
-- Action responses avoid returning raw Salesforce CLI payloads.
-
-Sales Dex is still a local tool that can affect the user's Salesforce CLI state. Users should confirm the selected org before setting defaults, opening production orgs, or logging out.
-
-## Desktop Builds
-
-Build the Windows portable executable:
-
-```bash
-npm run dist:win
-```
-
-Build macOS artifacts from a Mac runner or Mac machine:
-
-```bash
-npm run dist:mac
-```
-
-Build outputs are generated in:
-
-```text
-release/
-```
-
-The current Windows artifact is:
-
-```text
-Sales-Dex-0.1.0-x64.exe
-```
-
-## Development
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run the web app and local API:
-
-```bash
-npm run dev
-```
-
-Open:
-
-```text
-http://127.0.0.1:5173
-```
-
-Run the desktop app:
-
-```bash
-npm run desktop
-```
-
-Build the frontend:
-
-```bash
-npm run build
-```
-
-## Repository Contents
-
-```text
-electron/          Electron desktop entrypoint
-server/            Local Node/Express API
-src/               React UI
-data/              Local metadata examples
-build/             App icon assets
-release/           Generated app artifacts, ignored by git
-```
-
-## Current Status
-
-Version `0.1.0` is the first internal MVP.
-
-It supports Windows packaging today. macOS support is architecturally supported through Electron, but production-ready macOS distribution should add Apple code signing and notarization.
-
-## Changelog
-
-See [CHANGELOG.md](CHANGELOG.md).
-
-## Security
-
-See [SECURITY.md](SECURITY.md).
+- [User Guide](docs/USER_GUIDE.md)
+- [Security Notes](SECURITY.md)
+- [Changelog](CHANGELOG.md)
+- [Architecture](docs/ARCHITECTURE.md)
 
 ## License
 
