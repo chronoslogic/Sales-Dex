@@ -4,6 +4,8 @@ All notable changes to Sales Dex are documented here.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-05-23
+
 ### Changed
 
 - Replaced the Salesforce CLI default-org star action with a local Sales Dex favorite classification.
