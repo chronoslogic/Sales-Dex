@@ -34,7 +34,7 @@ async function readConfig() {
   await ensureConfig();
   const raw = await fs.readFile(configPath, "utf8");
   try {
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw.replace(/^\uFEFF/, ""));
     return { orgs: Array.isArray(parsed.orgs) ? parsed.orgs : [] };
   } catch {
     return { orgs: [] };
@@ -57,11 +57,7 @@ function runSf(args, options = {}) {
       const trimmedStdout = stdout.trim();
 
       if (trimmedStdout) {
-        try {
-          parsed = JSON.parse(trimmedStdout);
-        } catch {
-          parsed = null;
-        }
+        parsed = parseJsonOutput(trimmedStdout);
       }
 
       if (error) {
@@ -89,12 +85,34 @@ function runSf(args, options = {}) {
 }
 
 function buildErrorMessage(error, stderr, parsed) {
-  if (parsed?.message) return parsed.message;
-  if (parsed?.name && parsed?.message) return `${parsed.name}: ${parsed.message}`;
-  if (stderr?.trim()) return stderr.trim();
+  if (parsed?.message) return stripAnsi(parsed.message);
+  if (parsed?.name && parsed?.message) return stripAnsi(`${parsed.name}: ${parsed.message}`);
+  if (stderr?.trim()) return stripAnsi(stderr.trim());
   if (error?.code === "ENOENT") return "Salesforce CLI was not found. Install Salesforce CLI or confirm that the 'sf' command is in PATH.";
   if (error?.killed) return "The Salesforce CLI command took longer than expected and was interrupted.";
-  return error?.message || "Unable to run Salesforce CLI command.";
+  return stripAnsi(error?.message || "Unable to run Salesforce CLI command.");
+}
+
+function stripAnsi(value) {
+  return String(value || "").replace(/\u001b\[[0-9;]*m/g, "").trim();
+}
+
+function parseJsonOutput(value) {
+  const cleaned = stripAnsi(value);
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
 }
 
 function flattenOrgList(result) {
@@ -175,21 +193,151 @@ function inferSandbox(item) {
 }
 
 function mergeLocalMetadata(cliOrgs, metadata) {
-  const metadataByAlias = new Map(metadata.map((item) => [item.alias, item]));
-  return cliOrgs.map((org) => {
-    const local = metadataByAlias.get(org.alias) || metadataByAlias.get(org.username) || {};
+  const usedMetadataIndexes = new Set();
+  const mergedOrgs = cliOrgs.map((org) => {
+    const { local, index } = findLocalMetadataForOrg(metadata, org);
+    if (index >= 0) usedMetadataIndexes.add(index);
     const localEnvironment = normalizeEnvironment(local.environment);
     return {
       ...org,
+      username: org.username || local.username || "",
+      orgId: org.orgId || local.orgId || "",
+      instanceUrl: org.instanceUrl || local.instanceUrl || "",
+      loginUrl: org.loginUrl || local.loginUrl || "",
+      connectedStatus: org.connectedStatus || local.connectedStatus || "Unknown",
       client: local.client || "",
       riskLevel: normalizeRiskLevel(local.riskLevel),
       notes: local.notes || "",
+      favorite: Boolean(local.favorite),
       localEnvironment,
       effectiveEnvironment: localEnvironment && localEnvironment !== "Unknown" ? localEnvironment : org.environment,
+      lastCliLoginAt: local.lastCliLoginAt || "",
       localLastUsedAt: local.lastUsedAt || "",
       metadataUpdatedAt: local.updatedAt || ""
     };
   });
+
+  const disconnectedLocalOrgs = metadata
+    .filter((item, index) => !usedMetadataIndexes.has(index) && hasLocalOrgIdentity(item))
+    .map(localMetadataToOrg);
+
+  return [...mergedOrgs, ...disconnectedLocalOrgs];
+}
+
+function findLocalMetadataForOrg(metadata, org) {
+  const index = metadata.findIndex((item) =>
+    [org.alias, org.username, org.orgId].filter(Boolean).some((target) => localItemMatchesTarget(item, target))
+  );
+  return { local: index >= 0 ? metadata[index] : {}, index };
+}
+
+function findLocalMetadataIndex(metadata, target) {
+  return metadata.findIndex((item) => localItemMatchesTarget(item, target));
+}
+
+function localItemMatchesTarget(item, target) {
+  const normalizedTarget = normalizeTargetKey(target);
+  if (!normalizedTarget) return false;
+  return [item.alias, item.username, item.orgId].some((value) => normalizeTargetKey(value) === normalizedTarget);
+}
+
+function normalizeTargetKey(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function isDisconnectedLocalOrg(item) {
+  return String(item.connectedStatus || "").toLowerCase().includes("disconnect") || Boolean(item.disconnectedAt);
+}
+
+function isConnectedLocalOrg(item) {
+  const normalized = String(item.connectedStatus || "").toLowerCase();
+  return !normalized.includes("disconnect") && (normalized.includes("connect") || normalized.includes("active"));
+}
+
+function hasLocalOrgIdentity(item) {
+  return Boolean(String(item.alias || item.username || item.orgId || "").trim());
+}
+
+function needsConnectedDetails(org) {
+  return Boolean(isConnectedLocalOrg(org) && (!org.username || !org.orgId || !org.instanceUrl));
+}
+
+function snapshotFromDisplayResult(result, target, fallback = {}) {
+  const source = result?.result ?? result ?? {};
+  const isSandbox = inferSandbox(source);
+  const fallbackEnvironment = normalizeEnvironment(fallback.environment);
+  const displayEnvironment = isSandbox === true ? "Sandbox" : isSandbox === false ? "Production" : "Unknown";
+
+  return {
+    alias: source.alias || fallback.alias || target,
+    username: source.username || source.userName || fallback.username || "",
+    orgId: source.id || source.orgId || source.organizationId || fallback.orgId || "",
+    instanceUrl: source.instanceUrl || source.instanceURL || fallback.instanceUrl || "",
+    loginUrl: source.loginUrl || source.loginURL || fallback.loginUrl || "",
+    environment: fallbackEnvironment !== "Unknown" ? fallbackEnvironment : displayEnvironment,
+    connectedStatus: source.connectedStatus || source.status || fallback.connectedStatus || "Connected"
+  };
+}
+
+async function enrichConnectedLocalOrgs(orgs) {
+  const enriched = [];
+
+  for (const org of orgs) {
+    if (!needsConnectedDetails(org)) {
+      enriched.push(org);
+      continue;
+    }
+
+    const target = org.alias || org.username;
+    const displayResult = await runSf(["org", "display", "--target-org", target, "--json"]);
+
+    if (!displayResult.ok) {
+      await markDisconnected(target, org);
+      enriched.push({ ...org, connectedStatus: "Disconnected" });
+      continue;
+    }
+
+    const snapshot = snapshotFromDisplayResult(displayResult.result, target, org);
+    await touchLastUsed(target, snapshot);
+    enriched.push({
+      ...org,
+      ...snapshot,
+      id: snapshot.orgId || snapshot.alias || org.id,
+      environment: snapshot.environment,
+      effectiveEnvironment: snapshot.environment !== "Unknown" ? snapshot.environment : org.effectiveEnvironment,
+      localOnly: false
+    });
+  }
+
+  return enriched;
+}
+
+function localMetadataToOrg(local) {
+  const environment = normalizeEnvironment(local.environment);
+  return {
+    id: local.orgId || local.alias || local.username || cryptoRandomId(),
+    alias: local.alias || local.username || "",
+    username: local.username || "",
+    orgId: local.orgId || "",
+    instanceUrl: local.instanceUrl || "",
+    loginUrl: local.loginUrl || "",
+    environment,
+    isSandbox: environment === "Sandbox" ? true : environment === "Production" ? false : null,
+    connectedStatus: local.connectedStatus || "Disconnected",
+    lastUsed: "",
+    isDefault: false,
+    rawType: "local",
+    client: local.client || "",
+    riskLevel: normalizeRiskLevel(local.riskLevel),
+    notes: local.notes || "",
+    favorite: Boolean(local.favorite),
+    localEnvironment: environment,
+    effectiveEnvironment: environment,
+    lastCliLoginAt: local.lastCliLoginAt || "",
+    localLastUsedAt: local.lastUsedAt || "",
+    metadataUpdatedAt: local.updatedAt || "",
+    localOnly: true
+  };
 }
 
 function normalizeDetails(result, target, local) {
@@ -208,7 +356,8 @@ function normalizeDetails(result, target, local) {
     apiVersion: source.apiVersion || source.apiVersionNumber || "",
     client: local?.client || "",
     riskLevel: normalizeRiskLevel(local?.riskLevel),
-    notes: local?.notes || ""
+    notes: local?.notes || "",
+    favorite: Boolean(local?.favorite)
   };
 }
 
@@ -227,6 +376,7 @@ function sanitizeMetadata(input) {
     environment,
     riskLevel,
     notes: String(input.notes || "").trim().slice(0, 1200),
+    favorite: Boolean(input.favorite),
     updatedAt: new Date().toISOString()
   };
 }
@@ -241,22 +391,121 @@ function validateTarget(target) {
 
 function validateLoginAlias(alias) {
   const value = String(alias || "").trim();
+  if (/\s/.test(value)) {
+    throw new Error("Alias cannot contain spaces. Use letters, numbers, dots, hyphens, or underscores.");
+  }
   if (!aliasPattern.test(value)) {
-    throw new Error("Use a simple alias with letters, numbers, dot, hyphen, or underscore.");
+    throw new Error("Use a simple alias with letters, numbers, dots, hyphens, or underscores.");
   }
   return value;
 }
 
-async function touchLastUsed(alias) {
+function sanitizeClientName(client) {
+  const value = String(client || "").trim().slice(0, 120);
+  if (!value) {
+    throw new Error("Enter the client name.");
+  }
+  return value;
+}
+
+async function touchLastUsed(alias, orgSnapshot = {}) {
   const config = await readConfig();
   const now = new Date().toISOString();
-  const index = config.orgs.findIndex((item) => item.alias === alias);
+  const index = findLocalMetadataIndex(config.orgs, alias);
+  const snapshotEnvironment = normalizeEnvironment(orgSnapshot.environment);
   if (index >= 0) {
-    config.orgs[index] = { ...config.orgs[index], lastUsedAt: now };
+    const { disconnectedAt, ...existing } = config.orgs[index];
+    const existingEnvironment = normalizeEnvironment(existing.environment);
+    config.orgs[index] = {
+      ...existing,
+      alias: existing.alias || orgSnapshot.alias || alias,
+      client: orgSnapshot.client || existing.client || "",
+      username: orgSnapshot.username || existing.username || "",
+      orgId: orgSnapshot.orgId || existing.orgId || "",
+      instanceUrl: orgSnapshot.instanceUrl || existing.instanceUrl || "",
+      loginUrl: orgSnapshot.loginUrl || existing.loginUrl || "",
+      environment: existingEnvironment !== "Unknown" ? existingEnvironment : snapshotEnvironment,
+      connectedStatus: orgSnapshot.connectedStatus || "Connected",
+      lastCliLoginAt: orgSnapshot.lastCliLoginAt || existing.lastCliLoginAt || "",
+      updatedAt: now,
+      lastUsedAt: now
+    };
   } else {
-    config.orgs.push({ alias, client: "", environment: "Unknown", riskLevel: "Medium", notes: "", updatedAt: now, lastUsedAt: now });
+    config.orgs.push({
+      alias: orgSnapshot.alias || alias,
+      client: orgSnapshot.client || "",
+      username: orgSnapshot.username || "",
+      orgId: orgSnapshot.orgId || "",
+      instanceUrl: orgSnapshot.instanceUrl || "",
+      loginUrl: orgSnapshot.loginUrl || "",
+      environment: snapshotEnvironment,
+      riskLevel: "Medium",
+      notes: "",
+      favorite: false,
+      connectedStatus: orgSnapshot.connectedStatus || "Connected",
+      lastCliLoginAt: orgSnapshot.lastCliLoginAt || "",
+      updatedAt: now,
+      lastUsedAt: now
+    });
   }
   await writeConfig(config);
+}
+
+async function captureConnectedOrg(alias, metadata = {}) {
+  const displayResult = await runSf(["org", "display", "--target-org", alias, "--json"]);
+  if (!displayResult.ok) {
+    await touchLastUsed(alias, metadata);
+    return { ok: false, message: displayResult.message };
+  }
+
+  const snapshot = { ...snapshotFromDisplayResult(displayResult.result, alias, {}), ...metadata };
+  await touchLastUsed(alias, snapshot);
+  return { ok: true, details: snapshot };
+}
+
+async function markDisconnected(target, cliOrg = {}) {
+  const config = await readConfig();
+  const now = new Date().toISOString();
+  const index = findLocalMetadataIndex(config.orgs, target);
+  const existing = index >= 0 ? config.orgs[index] : {};
+  const existingEnvironment = normalizeEnvironment(existing.environment);
+  const cliEnvironment = normalizeEnvironment(cliOrg.environment);
+  const next = {
+    alias: existing.alias || cliOrg.alias || target,
+    client: existing.client || "",
+    environment: existingEnvironment !== "Unknown" ? existingEnvironment : cliEnvironment,
+    riskLevel: normalizeRiskLevel(existing.riskLevel),
+    notes: existing.notes || "",
+    favorite: Boolean(existing.favorite),
+    ...existing,
+    alias: existing.alias || cliOrg.alias || target,
+    username: cliOrg.username || existing.username || "",
+    orgId: cliOrg.orgId || existing.orgId || "",
+    instanceUrl: cliOrg.instanceUrl || existing.instanceUrl || "",
+    loginUrl: cliOrg.loginUrl || existing.loginUrl || defaultLoginUrl(existingEnvironment !== "Unknown" ? existingEnvironment : cliEnvironment),
+    environment: existingEnvironment !== "Unknown" ? existingEnvironment : cliEnvironment,
+    connectedStatus: "Disconnected",
+    disconnectedAt: now,
+    updatedAt: now
+  };
+
+  if (index >= 0) {
+    config.orgs[index] = next;
+  } else {
+    config.orgs.push(next);
+  }
+
+  await writeConfig(config);
+}
+
+function defaultLoginUrl(environment) {
+  if (environment === "Sandbox") return "https://test.salesforce.com/";
+  if (environment === "Production") return "https://login.salesforce.com/";
+  return "";
+}
+
+function findCliOrgByTarget(orgs, target) {
+  return orgs.find((org) => [org.alias, org.username, org.orgId].filter(Boolean).some((value) => normalizeTargetKey(value) === normalizeTargetKey(target))) || null;
 }
 
 function normalizeEnvironment(value) {
@@ -297,13 +546,13 @@ app.get("/local-api/orgs", asyncRoute(async (_req, res) => {
     res.status(200).json({
       ok: false,
       message: listResult.message,
-      orgs: mergeLocalMetadata([], config.orgs),
+      orgs: await enrichConnectedLocalOrgs(mergeLocalMetadata([], config.orgs)),
       localOrgs: config.orgs
     });
     return;
   }
 
-  const orgs = mergeLocalMetadata(flattenOrgList(listResult.result), config.orgs);
+  const orgs = await enrichConnectedLocalOrgs(mergeLocalMetadata(flattenOrgList(listResult.result), config.orgs));
   res.json({
     ok: true,
     orgs,
@@ -315,7 +564,8 @@ app.get("/local-api/orgs", asyncRoute(async (_req, res) => {
 app.get("/local-api/orgs/:target", asyncRoute(async (req, res) => {
   const target = validateTarget(req.params.target);
   const config = await readConfig();
-  const local = config.orgs.find((item) => item.alias === target);
+  const localIndex = findLocalMetadataIndex(config.orgs, target);
+  const local = localIndex >= 0 ? config.orgs[localIndex] : {};
   const displayResult = await runSf(["org", "display", "--target-org", target, "--json"]);
 
   if (!displayResult.ok) {
@@ -330,7 +580,7 @@ app.get("/local-api/orgs/:target", asyncRoute(async (req, res) => {
 app.post("/local-api/orgs/metadata", asyncRoute(async (req, res) => {
   const metadata = sanitizeMetadata(req.body);
   const config = await readConfig();
-  const index = config.orgs.findIndex((item) => item.alias === metadata.alias);
+  const index = findLocalMetadataIndex(config.orgs, metadata.alias);
 
   if (index >= 0) {
     config.orgs[index] = { ...config.orgs[index], ...metadata };
@@ -342,15 +592,52 @@ app.post("/local-api/orgs/metadata", asyncRoute(async (req, res) => {
   res.json({ ok: true, org: index >= 0 ? config.orgs[index] : metadata });
 }));
 
-app.post("/local-api/actions/default", asyncRoute(async (req, res) => {
+app.post("/local-api/orgs/favorite", asyncRoute(async (req, res) => {
   const target = validateTarget(req.body.target);
-  const result = await runSf(["config", "set", "--global", `target-org=${target}`, "--json"]);
-  if (!result.ok) {
-    res.status(200).json({ ok: false, message: result.message });
+  const favorite = Boolean(req.body.favorite);
+  const config = await readConfig();
+  const index = findLocalMetadataIndex(config.orgs, target);
+  const now = new Date().toISOString();
+
+  if (index >= 0) {
+    config.orgs[index] = { ...config.orgs[index], favorite, updatedAt: now };
+  } else {
+    config.orgs.push({
+      alias: target,
+      client: "",
+      environment: "Unknown",
+      riskLevel: "Medium",
+      notes: "",
+      favorite,
+      updatedAt: now
+    });
+  }
+
+  await writeConfig(config);
+  res.json({ ok: true, favorite, message: favorite ? `${target} added to favorites.` : `${target} removed from favorites.` });
+}));
+
+app.post("/local-api/orgs/remove", asyncRoute(async (req, res) => {
+  const target = validateTarget(req.body.target);
+  const config = await readConfig();
+  const index = findLocalMetadataIndex(config.orgs, target);
+
+  if (index < 0) {
+    res.json({ ok: true, message: `${target} was already removed from the Sales Dex list.` });
     return;
   }
-  await touchLastUsed(target);
-  res.json({ ok: true, message: `${target} is now the default org.` });
+
+  const listResult = await runSf(["org", "list", "--json"]);
+  const cliOrg = listResult.ok ? findCliOrgByTarget(flattenOrgList(listResult.result), target) : null;
+
+  if (cliOrg && !isDisconnectedLocalOrg(config.orgs[index])) {
+    res.status(200).json({ ok: false, message: "Only disconnected orgs can be removed from the local Sales Dex list." });
+    return;
+  }
+
+  config.orgs.splice(index, 1);
+  await writeConfig(config);
+  res.json({ ok: true, message: `${target} removed from the Sales Dex list.` });
 }));
 
 app.post("/local-api/actions/open", asyncRoute(async (req, res) => {
@@ -366,16 +653,52 @@ app.post("/local-api/actions/open", asyncRoute(async (req, res) => {
 
 app.post("/local-api/actions/logout", asyncRoute(async (req, res) => {
   const target = validateTarget(req.body.target);
+  const listResult = await runSf(["org", "list", "--json"]);
+  const cliOrg = listResult.ok ? findCliOrgByTarget(flattenOrgList(listResult.result), target) : null;
   const result = await runSf(["org", "logout", "--target-org", target, "--no-prompt", "--json"]);
   if (!result.ok) {
     res.status(200).json({ ok: false, message: result.message });
     return;
   }
+  await markDisconnected(target, cliOrg || {});
   res.json({ ok: true, message: `${target} disconnected from Salesforce CLI.` });
+}));
+
+app.post("/local-api/actions/reconnect", asyncRoute(async (req, res) => {
+  const target = validateTarget(req.body.target);
+  const config = await readConfig();
+  const index = findLocalMetadataIndex(config.orgs, target);
+  const local = index >= 0 ? config.orgs[index] : {};
+  const alias = validateTarget(local.alias || target);
+  const args = ["org", "login", "web", "--alias", alias, "--json"];
+  const reconnectUrl = local.loginUrl || local.instanceUrl || defaultLoginUrl(normalizeEnvironment(local.environment));
+
+  if (reconnectUrl) {
+    try {
+      const url = new URL(reconnectUrl);
+      if (!["https:"].includes(url.protocol)) {
+        throw new Error("The login URL must use HTTPS.");
+      }
+      args.push("--instance-url", url.toString());
+    } catch {
+      throw new Error("The saved login URL is not valid. Use New connection to authenticate this org again.");
+    }
+  }
+
+  const result = await runSf(args, { timeout: 300000 });
+  if (!result.ok) {
+    res.status(200).json({ ok: false, message: result.message });
+    return;
+  }
+
+  const lastCliLoginAt = new Date().toISOString();
+  await captureConnectedOrg(alias, { lastCliLoginAt });
+  res.json({ ok: true, message: `${alias} reconnected in Salesforce CLI.` });
 }));
 
 app.post("/local-api/actions/login", asyncRoute(async (req, res) => {
   const alias = validateLoginAlias(req.body.alias);
+  const client = sanitizeClientName(req.body.client);
   const instanceUrl = String(req.body.instanceUrl || "").trim();
   const args = ["org", "login", "web", "--alias", alias, "--json"];
 
@@ -397,7 +720,8 @@ app.post("/local-api/actions/login", asyncRoute(async (req, res) => {
     return;
   }
 
-  await touchLastUsed(alias);
+  const lastCliLoginAt = new Date().toISOString();
+  await captureConnectedOrg(alias, { client, lastCliLoginAt });
   res.json({ ok: true, message: `${alias} authenticated in Salesforce CLI.` });
 }));
 

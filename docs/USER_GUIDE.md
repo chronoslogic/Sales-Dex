@@ -18,37 +18,43 @@ If you are not sure whether Salesforce CLI is installed, ask the maintainer or y
 
 ### Windows
 
-1. Open the Sales Dex Releases page:
+1. Download the Windows app:
 
-   [Sales Dex Releases](https://github.com/chronoslogic/Sales-Dex/releases/latest)
+   [Sales-Dex-Windows-x64.exe](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-Windows-x64.exe)
 
-2. Download the Windows file:
+2. Save the file somewhere easy to find.
 
-   ```text
-   Sales-Dex-0.1.1-x64.exe
-   ```
+3. Double-click the file to open Sales Dex.
 
-3. Save the file somewhere easy to find.
+4. If Windows shows a warning, make sure the file came from the official release page or from Eduardo before opening it.
 
-4. Double-click the file to open Sales Dex.
-
-5. If Windows shows a warning, make sure the file came from the official release page or from Eduardo before opening it.
-
-6. Click **Refresh**.
+5. Click **Refresh**.
 
 ### macOS
 
-macOS downloads are not available yet.
+1. Download the macOS app:
 
-The app is designed to support macOS later, but the current release is Windows-only.
+   [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg)
+
+2. Open the `.dmg` file.
+
+3. Drag **Sales Dex** into **Applications** if macOS asks.
+
+4. Open **Sales Dex** from Applications.
+
+5. If macOS blocks the app because it is not signed yet, right-click **Sales Dex**, click **Open**, and confirm that it came from the official release page or from Eduardo.
+
+6. Click **Refresh**.
 
 ## First Login
 
 If Sales Dex opens but shows no orgs, you probably have not logged in to Salesforce CLI yet.
 
-Use the **New login** panel:
+Use the **New connection** panel:
 
-1. Enter an alias.
+1. Enter the client name.
+
+2. Enter an alias.
 
    Example:
 
@@ -56,15 +62,15 @@ Use the **New login** panel:
    client-prod
    ```
 
-2. Choose **Production** or **Sandbox**.
+3. Choose **Production** or **Sandbox**.
 
-3. Click **Start login**.
+4. Click **Start login**.
 
-4. Log in to Salesforce in your browser.
+5. Log in to Salesforce in your browser.
 
-5. Return to Sales Dex.
+6. Return to Sales Dex.
 
-6. Click **Refresh**.
+7. Click **Refresh**.
 
 ## Main Screen
 
@@ -77,8 +83,8 @@ The main table shows:
 - instance URL
 - production or sandbox
 - connection status
-- last used date
-- whether the org is the default org
+- last Salesforce CLI login captured by Sales Dex
+- whether the org is a Sales Dex favorite
 
 Click an org row to see more details.
 
@@ -89,6 +95,7 @@ When you select an org, you can save extra local information:
 - client name
 - environment
 - risk level
+- favorite
 - notes
 
 This is only saved on your computer.
@@ -100,18 +107,20 @@ This is only saved on your computer.
 | Refresh | Reloads the org list. |
 | Copy alias | Copies the org alias. |
 | Copy username | Copies the username. |
+| Codex prompt | Copies a prompt for Codex to verify and use the connected Salesforce CLI org. |
 | Open | Opens the org in your browser. |
-| Default | Sets the org as your default Salesforce CLI org. |
+| Favorite | Marks or unmarks the org as a Sales Dex favorite. |
 | Status | Checks the org connection again. |
-| Disconnect | Logs the org out from Salesforce CLI on your computer. |
-| Start login | Starts a new Salesforce login. |
-| Save local record | Saves client notes on your computer. |
+| Disconnect | Logs the org out from Salesforce CLI on your computer and keeps it visible as **Disconnected**. |
+| Reconnect | Starts Salesforce login again for a disconnected org. |
+| Remove from list | Removes a disconnected org from the local Sales Dex list. |
+| Start login | Starts a new Salesforce login after a client name and alias are entered. |
+| Save client information | Saves client notes and favorite status on your computer. |
 
 ## Safety Tips
 
 - Check whether the org is **Production** or **Sandbox**.
 - Be extra careful with production orgs.
-- Only set a production org as default when you are sure it is correct.
 - Sales Dex does not change Salesforce data.
 - Sales Dex does not store your Salesforce password.
 

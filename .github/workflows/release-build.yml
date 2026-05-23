@@ -6,6 +6,9 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     name: Windows portable
@@ -30,10 +33,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sales-dex-windows
-          path: release/*.exe
+          path: release/Sales-Dex-Windows-x64.exe
 
   build-macos:
-    name: macOS artifacts
+    name: macOS universal
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -56,5 +59,25 @@ jobs:
         with:
           name: sales-dex-macos
           path: |
-            release/*.dmg
-            release/*.zip
+            release/Sales-Dex-macOS-universal.dmg
+            release/Sales-Dex-macOS-universal.zip
+
+  publish-release:
+    name: Publish GitHub release assets
+    if: startsWith(github.ref, 'refs/tags/')
+    needs:
+      - build-windows
+      - build-macos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true

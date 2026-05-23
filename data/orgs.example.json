@@ -5,8 +5,11 @@
       "client": "Example Client",
       "environment": "Production",
       "riskLevel": "High",
-      "notes": "Sensitive production org. Confirm client context before any default-target or logout action.",
+      "favorite": true,
+      "connectedStatus": "Connected",
+      "notes": "Sensitive production org. Confirm client context before opening or logging out.",
       "updatedAt": "2026-05-23T12:00:00.000Z",
+      "lastCliLoginAt": "2026-05-23T11:45:00.000Z",
       "lastUsedAt": "2026-05-23T12:00:00.000Z"
     },
     {
@@ -14,8 +17,12 @@
       "client": "Example Client",
       "environment": "Sandbox",
       "riskLevel": "Low",
+      "favorite": false,
+      "connectedStatus": "Disconnected",
+      "disconnectedAt": "2026-05-23T13:00:00.000Z",
       "notes": "Development sandbox.",
       "updatedAt": "2026-05-23T12:00:00.000Z",
+      "lastCliLoginAt": "2026-05-23T10:30:00.000Z",
       "lastUsedAt": "2026-05-23T12:00:00.000Z"
     }
   ]

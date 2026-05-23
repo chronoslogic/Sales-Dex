@@ -28,13 +28,48 @@
 }
 
 body {
+  position: relative;
+  min-height: 100vh;
   min-width: 320px;
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at 12% 4%, rgba(1, 118, 211, 0.18), transparent 32%),
-    radial-gradient(circle at 84% 0%, rgba(72, 95, 199, 0.16), transparent 30%),
-    linear-gradient(180deg, #f8fbff 0%, var(--background) 46%, #e8eef6 100%);
+    linear-gradient(112deg, rgba(2, 35, 89, 0.74) 0%, rgba(4, 72, 126, 0.5) 24%, rgba(255, 255, 255, 0) 54%),
+    linear-gradient(246deg, rgba(1, 118, 211, 0.3) 0%, rgba(1, 118, 211, 0.06) 32%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, #d9ebf8 0%, #eef5fb 38%, #dfe8f4 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.54)),
+    url("./assets/tech-background.svg");
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: cover;
+  mask-image: linear-gradient(90deg, #000 0%, rgba(0, 0, 0, 0.8) 22%, rgba(0, 0, 0, 0.22) 52%, rgba(0, 0, 0, 0.74) 100%);
+  opacity: 0.58;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(30deg, rgba(0, 185, 255, 0.14) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(150deg, rgba(0, 185, 255, 0.08) 0 1px, transparent 1px 28px);
+  background-size: 132px 76px;
+  mask-image:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.76), transparent 34%, transparent 67%, rgba(0, 0, 0, 0.62)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.78), transparent 52%, rgba(0, 0, 0, 0.48));
+  opacity: 0.1;
 }
 
 button,
@@ -83,49 +118,18 @@ button:disabled {
 
 .salesdex-mark {
   position: relative;
-  display: grid;
-  width: 74px;
-  height: 58px;
+  width: 72px;
+  height: 72px;
   flex: 0 0 auto;
-  place-items: center;
 }
 
-.mark-cloud {
-  display: grid;
-  width: 66px;
-  height: 46px;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 22px;
-  background: linear-gradient(135deg, #00a1e0 0%, #0176d3 60%, #084d96 100%);
-  color: #ffffff;
-  box-shadow: 0 16px 32px rgba(1, 118, 211, 0.24);
-}
-
-.mark-cloud svg {
-  position: absolute;
-  opacity: 0.28;
-}
-
-.mark-cloud span {
-  position: relative;
-  font-size: 0.78rem;
-  font-weight: 850;
-}
-
-.mark-core {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border: 2px solid #ffffff;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #172033, #3e4c74);
-  color: #bde4ff;
-  box-shadow: 0 10px 22px rgba(23, 32, 51, 0.28);
+.salesdex-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 14px 24px rgba(197, 31, 51, 0.18));
+  user-select: none;
 }
 
 .topbar h1 {
@@ -173,35 +177,91 @@ button:disabled {
 }
 
 .notice {
+  position: fixed;
+  top: 118px;
+  left: 50%;
+  z-index: 70;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 10px 12px;
-  margin-bottom: 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-soft);
+  align-items: flex-start;
+  gap: 12px;
+  width: min(480px, calc(100vw - 36px));
+  min-height: 64px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 5px;
+  color: #ffffff;
+  box-shadow: 0 18px 44px rgba(10, 24, 51, 0.22);
+  transform: translateX(-50%);
+  animation: toast-banner-in 180ms ease-out;
+}
+
+.notice > svg {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 3px;
+}
+
+.notice > span {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.notice > span strong {
+  display: block;
+  color: inherit;
+  font-size: 0.98rem;
+  font-weight: 820;
+  line-height: 1.1;
+}
+
+.notice .icon-button {
+  width: 32px;
+  height: 32px;
+  margin: 0 -5px 0 4px;
+  color: inherit;
+  opacity: 0.9;
+}
+
+.notice .icon-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
 }
 
 .notice.success {
-  border-color: #b9e7d4;
-  background: var(--success-bg);
-  color: var(--success);
+  background: #04844b;
 }
 
 .notice.warning {
-  border-color: #f2d09b;
-  background: var(--warning-bg);
-  color: var(--warning);
+  background: #f6a737;
+  color: #2f2106;
 }
 
 .notice.error {
-  border-color: #efb9b9;
+  background: #c23934;
+}
+
+.inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #efb9b9;
+  border-radius: 8px;
   background: var(--danger-bg);
   color: var(--danger);
+  font-size: 0.82rem;
+  font-weight: 760;
+  line-height: 1.35;
+}
+
+.inline-error svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
 }
 
 .icon-button {
@@ -342,10 +402,11 @@ button:disabled {
 
 table {
   width: 100%;
-  min-width: 1180px;
+  min-width: 1280px;
   border-collapse: collapse;
   font-size: 0.85rem;
   table-layout: fixed;
+  border-left: 1px solid #e7eef6;
 }
 
 th:nth-child(1),
@@ -390,18 +451,19 @@ td:nth-child(8) {
 
 th:nth-child(9),
 td:nth-child(9) {
-  width: 60px;
+  width: 84px;
 }
 
 th:nth-child(10),
 td:nth-child(10) {
-  width: 120px;
+  width: 150px;
 }
 
 th,
 td {
   padding: 11px 12px;
   border-bottom: 1px solid #e5ebf2;
+  border-right: 1px solid #e7eef6;
   text-align: left;
   vertical-align: middle;
 }
@@ -410,12 +472,49 @@ th {
   position: sticky;
   z-index: 1;
   top: 0;
+  text-align: center;
   background: #f7faff;
   color: #4d596c;
   font-size: 0.72rem;
   font-weight: 820;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-align: center;
+  text-transform: inherit;
+  white-space: nowrap;
+}
+
+.sort-header svg {
+  flex: 0 0 auto;
+  color: #8a98ab;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.sort-header:hover,
+.sort-header.active {
+  color: var(--accent);
+}
+
+.sort-header:hover svg,
+.sort-header.active svg {
+  color: currentColor;
 }
 
 tbody tr {
@@ -439,6 +538,8 @@ td:last-child {
   position: sticky;
   right: 0;
   min-width: 118px;
+  border-left: 1px solid #d9e4ef;
+  border-right: 0;
   background: #ffffff;
   box-shadow: -10px 0 18px rgba(31, 42, 68, 0.08);
 }
@@ -485,7 +586,7 @@ td:nth-child(3) {
 }
 
 .badge,
-.default-badge,
+.favorite-badge,
 .risk-inline {
   display: inline-flex;
   align-items: center;
@@ -523,14 +624,19 @@ td:nth-child(3) {
   color: var(--warning);
 }
 
+.badge.status.disconnected {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
 .badge.status.unknown {
   background: #eef3f8;
   color: #4d596c;
 }
 
-.default-badge {
-  background: #e7f2ff;
-  color: var(--accent);
+.favorite-badge {
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 .risk-inline {
@@ -559,6 +665,23 @@ td:nth-child(3) {
 .icon-action:hover {
   border-color: var(--border-strong);
   color: var(--accent);
+}
+
+.icon-action.active {
+  border-color: #f2d09b;
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.icon-action.danger {
+  border-color: #efb9b9;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.icon-action.danger:hover {
+  border-color: #df8f8f;
+  color: var(--danger);
 }
 
 .button {
@@ -769,6 +892,15 @@ td:nth-child(3) {
   box-shadow: 0 0 0 3px rgba(1, 118, 211, 0.12);
 }
 
+.metadata-form input:disabled,
+.metadata-form select:disabled,
+.metadata-form textarea:disabled {
+  cursor: wait;
+  border-color: #dce6f1;
+  background: #eef4f9;
+  color: #6b7a90;
+}
+
 .metadata-form textarea {
   min-height: 88px;
   resize: vertical;
@@ -820,7 +952,7 @@ td:nth-child(3) {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  z-index: 10;
+  z-index: 60;
   transform: translateY(12px);
   opacity: 0;
   pointer-events: none;
@@ -843,6 +975,18 @@ td:nth-child(3) {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes toast-banner-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 
@@ -880,6 +1024,14 @@ td:nth-child(3) {
 
   .topbar-actions .connection-chip {
     justify-content: center;
+  }
+
+  .notice {
+    top: 12px;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: calc(100vw - 20px);
   }
 
   .summary-grid {

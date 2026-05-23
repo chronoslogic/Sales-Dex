@@ -20,10 +20,11 @@ Current version:
 
 Current available download:
 
-```text
-Windows: Sales-Dex-0.1.1-x64.exe
-macOS: In progress
-```
+| System | Download |
+| --- | --- |
+| Windows 64-bit | [Sales-Dex-Windows-x64.exe](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-Windows-x64.exe) |
+| macOS Intel and Apple Silicon | [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg) |
+| macOS ZIP fallback | [Sales-Dex-macOS-universal.zip](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.zip) |
 
 ## What Sales Dex Does
 
@@ -36,8 +37,8 @@ With Sales Dex, you can:
 - see the username, alias, Org ID, and instance URL
 - add a client name and notes to each org
 - mark an org risk level as Low, Medium, or High
+- favorite important orgs inside Sales Dex
 - open an org in the browser
-- set an org as your default Salesforce CLI org
 - disconnect an org from your local Salesforce CLI
 - start a new Salesforce login
 
@@ -58,7 +59,7 @@ It is a local helper app for org visibility and switching.
 
 Before using Sales Dex, each user needs:
 
-- Windows computer
+- Windows or macOS computer
 - Salesforce CLI installed
 - access to at least one Salesforce org
 - permission to log in to that Salesforce org
@@ -79,11 +80,9 @@ Official Salesforce CLI download page:
 
 2. Choose the installer for your computer.
 
-   Most Windows users should choose:
+   Most Windows users should choose **Download for Windows x64**.
 
-   ```text
-   Download for Windows x64
-   ```
+   Most macOS users should choose the macOS installer for their Mac.
 
 3. Run the Salesforce CLI installer.
 
@@ -101,11 +100,12 @@ Official Salesforce CLI download page:
 
    [Sales Dex Releases](https://github.com/chronoslogic/Sales-Dex/releases/latest)
 
-2. Download:
+2. Download the file for your computer:
 
-   ```text
-   Sales-Dex-0.1.1-x64.exe
-   ```
+   | System | File |
+   | --- | --- |
+   | Windows | [Sales-Dex-Windows-x64.exe](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-Windows-x64.exe) |
+   | macOS | [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg) |
 
 3. Save it somewhere easy to find, for example:
 
@@ -117,7 +117,9 @@ Official Salesforce CLI download page:
 
 ### Step 3: Open Sales Dex
 
-1. Double-click `Sales-Dex-0.1.1-x64.exe`.
+#### Windows
+
+1. Double-click `Sales-Dex-Windows-x64.exe`.
 
 2. If Windows shows a security warning, confirm that the file came from the official company/GitHub release before opening it.
 
@@ -125,24 +127,37 @@ Official Salesforce CLI download page:
 
 4. Click **Refresh**.
 
+#### macOS
+
+1. Double-click `Sales-Dex-macOS-universal.dmg`.
+
+2. Drag **Sales Dex** into **Applications** if macOS asks.
+
+3. Open **Sales Dex** from Applications.
+
+4. If macOS blocks the app because it is not signed yet, right-click **Sales Dex**, click **Open**, and confirm that the file came from the official company/GitHub release.
+
+5. Click **Refresh**.
+
 ## First Use
 
 If you already logged in to Salesforce CLI before, your orgs should appear after clicking **Refresh**.
 
 If no orgs appear:
 
-1. In Sales Dex, go to **New login**.
-2. Enter an alias, for example:
+1. In Sales Dex, click **New connection**.
+2. Enter the client name.
+3. Enter an alias, for example:
 
    ```text
    client-prod
    ```
 
-3. Choose **Production** or **Sandbox**.
-4. Click **Start login**.
-5. Your browser will open Salesforce login.
-6. Log in normally.
-7. Return to Sales Dex and click **Refresh**.
+4. Choose **Production** or **Sandbox**.
+5. Click **Start login**.
+6. Your browser will open Salesforce login.
+7. Log in normally.
+8. Return to Sales Dex and click **Refresh**.
 
 ## Button Guide
 
@@ -151,18 +166,20 @@ If no orgs appear:
 | Refresh | Reloads the org list from Salesforce CLI. |
 | Copy alias | Copies the org alias to your clipboard. |
 | Copy username | Copies the Salesforce username to your clipboard. |
+| Codex prompt | Copies a ready-to-paste prompt for Codex to verify and use the connected Salesforce CLI org. |
 | Open | Opens the selected org in your browser. |
-| Default | Sets the selected org as your default Salesforce CLI org. |
+| Favorite | Marks or unmarks the org as a Sales Dex favorite. |
 | Status | Checks the selected org connection again. |
-| Disconnect | Logs the selected org out of Salesforce CLI on your computer. |
-| Start login | Starts a new Salesforce login using Salesforce CLI. |
-| Save local record | Saves client name, environment, risk level, and notes on your computer. |
+| Disconnect | Logs the selected org out of Salesforce CLI on your computer and keeps it visible as **Disconnected**. |
+| Reconnect | Starts Salesforce login again for a disconnected org. |
+| Remove from list | Removes a disconnected org from the local Sales Dex list. |
+| Start login | Starts a new Salesforce login after a client name and alias are entered. |
+| Save client information | Saves client name, environment, risk level, favorite, and notes on your computer. |
 
 ## Important Safety Notes
 
 - Always check whether an org is **Production** or **Sandbox** before using it.
-- Be careful when setting a production org as default.
-- Disconnecting an org only logs it out from your local Salesforce CLI.
+- Disconnecting an org only logs it out from your local Salesforce CLI. It stays visible in Sales Dex until you reconnect it or remove it from the local list.
 - Sales Dex stores your notes and client labels locally on your machine.
 - Sales Dex does not send your Salesforce org list to an external server.
 
@@ -180,7 +197,7 @@ When a new version is ready, Eduardo will publish it in GitHub Releases. Users c
 
 Click **Refresh**.
 
-If the list is still empty, Salesforce CLI may not have any logged-in orgs yet. Use **New login** in Sales Dex, or ask the maintainer for help.
+If the list is still empty, Salesforce CLI may not have any logged-in orgs yet. Use **New connection** in Sales Dex, or ask the maintainer for help.
 
 ### Salesforce CLI is not installed
 
@@ -240,6 +257,23 @@ npm run dist:mac
 ```
 
 macOS builds should be created on a Mac or a macOS GitHub Actions runner.
+
+The GitHub release workflow builds:
+
+```text
+Sales-Dex-Windows-x64.exe
+Sales-Dex-macOS-universal.dmg
+Sales-Dex-macOS-universal.zip
+```
+
+To publish a release, push a version tag such as:
+
+```bash
+git tag v0.1.1
+git push origin v0.1.1
+```
+
+GitHub Actions will attach the Windows and macOS downloads to the release.
 
 ### Technical Stack
 

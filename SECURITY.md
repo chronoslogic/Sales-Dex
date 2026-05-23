@@ -31,7 +31,7 @@ The local API only runs specific allowlisted Salesforce CLI commands needed by t
 
 ## Production Org Safety
 
-Production orgs are clearly labeled. Some actions, such as setting a production org as default, require confirmation.
+Production orgs are clearly labeled. Actions that can affect local org access, such as disconnecting from Salesforce CLI, should require clear confirmation.
 
 Before adding any future write capability, the app should require:
 

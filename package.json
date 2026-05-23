@@ -16,7 +16,8 @@
     "desktop:dev": "concurrently -k -n api,web,electron -c cyan,magenta,green \"node server/server.mjs\" \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && set ELECTRON_START_URL=http://127.0.0.1:5173&& electron .\"",
     "dist": "npm run dist:win",
     "dist:win": "npm run build && electron-builder --win portable",
-    "dist:mac": "npm run build && electron-builder --mac dmg zip"
+    "prepare:mac-icon": "node scripts/create-mac-icon.mjs",
+    "dist:mac": "npm run prepare:mac-icon && npm run build && electron-builder --mac dmg zip --universal"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
@@ -61,7 +62,19 @@
           ]
         }
       ],
-      "artifactName": "Sales-Dex-${version}-${arch}.${ext}"
+      "artifactName": "Sales-Dex-Windows-${arch}.${ext}"
+    },
+    "mac": {
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "artifactName": "Sales-Dex-macOS-${arch}.${ext}"
     }
   }
 }

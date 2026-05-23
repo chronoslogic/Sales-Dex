@@ -79,3 +79,14 @@ macOS:
 ```bash
 npm run dist:mac
 ```
+
+Release artifacts use stable names so GitHub latest-download links do not change between versions:
+
+```text
+Sales-Dex-Windows-x64.exe
+Sales-Dex-macOS-universal.dmg
+Sales-Dex-macOS-universal.zip
+```
+
+Windows builds run on `windows-latest`.
+macOS builds run on `macos-latest` because macOS packages must be built on macOS.
