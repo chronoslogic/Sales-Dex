@@ -32,9 +32,14 @@ If you are not sure whether Salesforce CLI is installed, ask the maintainer or y
 
 ### macOS
 
-1. Download the macOS app:
+1. Download the macOS app for your Mac:
 
-   [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg)
+   | Mac type | File |
+   | --- | --- |
+   | Apple Silicon | [Sales-Dex-macOS-arm64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-arm64.dmg) |
+   | Intel | [Sales-Dex-macOS-x64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-x64.dmg) |
+
+   Most newer Macs use **Apple Silicon**. Older Macs use **Intel**. If you are not sure, open the Apple menu and click **About This Mac**.
 
 2. Open the `.dmg` file.
 

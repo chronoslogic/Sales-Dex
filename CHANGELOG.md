@@ -31,7 +31,7 @@ All notable changes to Sales Dex are documented here.
 - Reworked the page background with a subdued blue circuit and hex-grid visual treatment.
 - Changed app notices into centered Salesforce-style toast banners with titles and auto-dismiss for success and warning messages.
 - Changed **Last log in at** to use a dedicated CLI login timestamp captured after successful Sales Dex login/reconnect actions.
-- Added macOS universal packaging, stable release artifact names, and GitHub Release download links for Windows and macOS users.
+- Added macOS Apple Silicon and Intel packaging, stable release artifact names, and GitHub Release download links for Windows and macOS users.
 
 ## [0.1.1] - 2026-05-23
 

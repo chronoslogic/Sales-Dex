@@ -36,7 +36,7 @@ jobs:
           path: release/Sales-Dex-Windows-x64.exe
 
   build-macos:
-    name: macOS universal
+    name: macOS Intel and Apple Silicon
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -59,8 +59,10 @@ jobs:
         with:
           name: sales-dex-macos
           path: |
-            release/Sales-Dex-macOS-universal.dmg
-            release/Sales-Dex-macOS-universal.zip
+            release/Sales-Dex-macOS-x64.dmg
+            release/Sales-Dex-macOS-arm64.dmg
+            release/Sales-Dex-macOS-x64.zip
+            release/Sales-Dex-macOS-arm64.zip
 
   publish-release:
     name: Publish GitHub release assets

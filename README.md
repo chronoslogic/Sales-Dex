@@ -23,8 +23,8 @@ Current available download:
 | System | Download |
 | --- | --- |
 | Windows 64-bit | [Sales-Dex-Windows-x64.exe](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-Windows-x64.exe) |
-| macOS Intel and Apple Silicon | [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg) |
-| macOS ZIP fallback | [Sales-Dex-macOS-universal.zip](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.zip) |
+| macOS Apple Silicon | [Sales-Dex-macOS-arm64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-arm64.dmg) |
+| macOS Intel | [Sales-Dex-macOS-x64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-x64.dmg) |
 
 ## What Sales Dex Does
 
@@ -105,7 +105,10 @@ Official Salesforce CLI download page:
    | System | File |
    | --- | --- |
    | Windows | [Sales-Dex-Windows-x64.exe](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-Windows-x64.exe) |
-   | macOS | [Sales-Dex-macOS-universal.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-universal.dmg) |
+   | macOS Apple Silicon | [Sales-Dex-macOS-arm64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-arm64.dmg) |
+   | macOS Intel | [Sales-Dex-macOS-x64.dmg](https://github.com/chronoslogic/Sales-Dex/releases/latest/download/Sales-Dex-macOS-x64.dmg) |
+
+   Most newer Macs use **Apple Silicon**. Older Macs use **Intel**. If you are not sure, open the Apple menu and click **About This Mac**.
 
 3. Save it somewhere easy to find, for example:
 
@@ -129,7 +132,7 @@ Official Salesforce CLI download page:
 
 #### macOS
 
-1. Double-click `Sales-Dex-macOS-universal.dmg`.
+1. Double-click the macOS `.dmg` file you downloaded.
 
 2. Drag **Sales Dex** into **Applications** if macOS asks.
 
@@ -262,8 +265,10 @@ The GitHub release workflow builds:
 
 ```text
 Sales-Dex-Windows-x64.exe
-Sales-Dex-macOS-universal.dmg
-Sales-Dex-macOS-universal.zip
+Sales-Dex-macOS-arm64.dmg
+Sales-Dex-macOS-x64.dmg
+Sales-Dex-macOS-arm64.zip
+Sales-Dex-macOS-x64.zip
 ```
 
 To publish a release, push a version tag such as:

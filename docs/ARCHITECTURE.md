@@ -84,8 +84,10 @@ Release artifacts use stable names so GitHub latest-download links do not change
 
 ```text
 Sales-Dex-Windows-x64.exe
-Sales-Dex-macOS-universal.dmg
-Sales-Dex-macOS-universal.zip
+Sales-Dex-macOS-arm64.dmg
+Sales-Dex-macOS-x64.dmg
+Sales-Dex-macOS-arm64.zip
+Sales-Dex-macOS-x64.zip
 ```
 
 Windows builds run on `windows-latest`.
