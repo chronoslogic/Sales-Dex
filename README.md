@@ -5,7 +5,6 @@
 It is especially useful for people who work with multiple clients, sandboxes, and production orgs during the same day.
 
 Created by **Eduardo Souza** with **Codex**.  
-Maintained by **Eduardo Souza**. Users only need to download and use the app.
 
 ## Download
 
@@ -23,7 +22,7 @@ Current available download:
 
 ```text
 Windows: Sales-Dex-0.1.0-x64.exe
-macOS: Not available yet
+macOS: In progress
 ```
 
 ## What Sales Dex Does
