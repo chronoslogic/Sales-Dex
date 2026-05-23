@@ -15,9 +15,9 @@
     "desktop": "npm run build && electron .",
     "desktop:dev": "concurrently -k -n api,web,electron -c cyan,magenta,green \"node server/server.mjs\" \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && set ELECTRON_START_URL=http://127.0.0.1:5173&& electron .\"",
     "dist": "npm run dist:win",
-    "dist:win": "npm run build && electron-builder --win portable",
+    "dist:win": "npm run build && electron-builder --win portable --publish never",
     "prepare:mac-icon": "node scripts/create-mac-icon.mjs",
-    "dist:mac": "npm run prepare:mac-icon && npm run build && electron-builder --mac dmg zip --x64 --arm64"
+    "dist:mac": "npm run prepare:mac-icon && npm run build && electron-builder --mac dmg zip --x64 --arm64 --publish never"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
