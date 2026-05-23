@@ -4,7 +4,7 @@
 
 It gives users a clean command center for Salesforce CLI orgs: see what is connected, identify production vs sandbox, attach client context, validate connection status, open orgs, set a default target, and start new CLI logins without memorizing aliases or long commands.
 
-Sales Dex was created by **Eduardo** with **Codex**.
+Sales Dex was created by **Eduardo Souza**.
 
 ## Purpose
 
