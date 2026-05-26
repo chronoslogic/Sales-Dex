@@ -6,6 +6,13 @@ const PORT = Number(process.env.SALES_DEX_PORT || 4317);
 let apiServer;
 let mainWindow;
 
+function getWindowIcon() {
+  if (process.platform === "darwin") {
+    return undefined;
+  }
+  return path.join(__dirname, "..", "build", "icon.ico");
+}
+
 async function startLocalApi() {
   process.env.SALES_DEX_DATA_DIR = path.join(app.getPath("userData"), "data");
   const serverUrl = pathToFileURL(path.join(__dirname, "..", "server", "server.mjs")).href;
@@ -25,6 +32,7 @@ async function createWindow() {
     minWidth: 1080,
     minHeight: 720,
     title: "Sales Dex",
+    icon: getWindowIcon(),
     backgroundColor: "#eef3f8",
     autoHideMenuBar: true,
     webPreferences: {

@@ -4,6 +4,12 @@ All notable changes to Sales Dex are documented here.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-05-26
+
+### Changed
+
+- Updated the Windows desktop executable, taskbar, and window icon to use the red Sales Dex handheld scanner mark.
+
 ## [0.1.2] - 2026-05-23
 
 ### Changed

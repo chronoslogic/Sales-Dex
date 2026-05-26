@@ -15,7 +15,7 @@ Download the latest version from the GitHub Releases page:
 Current version:
 
 ```text
-0.1.2
+0.1.3
 ```
 
 Current available download:
@@ -274,8 +274,8 @@ Sales-Dex-macOS-x64.zip
 To publish a release, push a version tag such as:
 
 ```bash
-git tag v0.1.2
-git push origin v0.1.2
+git tag v0.1.3
+git push origin v0.1.3
 ```
 
 GitHub Actions will attach the Windows and macOS downloads to the release.
@@ -284,7 +284,7 @@ GitHub Actions will attach the Windows and macOS downloads to the release.
 
 | Dependency | Version |
 | --- | --- |
-| Sales Dex | `0.1.2` |
+| Sales Dex | `0.1.3` |
 | Electron | `42.2.0` |
 | React | `19.2.6` |
 | Vite | `7.3.3` |
